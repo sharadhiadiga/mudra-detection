@@ -118,6 +118,11 @@
     const UNSTABLE_MS = 3000;
     const MIN_CONF_FOR_VOTE = 0.2;
 
+    function cleanMudraLabel(s) {
+      if (s == null || typeof s !== 'string') return s;
+      return s.split('(')[0].trim();
+    }
+
     let timer = null;
     let stream = null;
     const recent = [];
@@ -195,12 +200,13 @@
           mainPred.classList.remove('locked');
           return;
         }
-        const mudra = data.mudra;
+        const mudraRaw = data.mudra;
         const conf = typeof data.confidence === 'number' ? data.confidence : 0;
 
-        if (mudra == null) {
+        if (mudraRaw == null) {
           return;
         }
+        const mudra = cleanMudraLabel(String(mudraRaw));
 
         if (conf >= MIN_CONF_FOR_VOTE) {
           recent.push(mudra);
@@ -224,10 +230,11 @@
         }
 
         if (lockedMudra != null) {
-          mainPred.textContent = lockedMudra;
+          mainPred.textContent = cleanMudraLabel(lockedMudra);
           mainPred.classList.add('locked');
         } else {
-          mainPred.textContent = displayMaj && displayMaj.length ? displayMaj : 'Detecting...';
+          const shown = displayMaj && displayMaj.length ? cleanMudraLabel(displayMaj) : '';
+          mainPred.textContent = shown && shown.length ? shown : 'Detecting...';
           mainPred.classList.remove('locked');
         }
       } catch (e) {

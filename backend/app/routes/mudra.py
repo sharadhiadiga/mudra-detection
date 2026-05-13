@@ -19,6 +19,13 @@ _LABEL_ENCODER: Any = None
 _SERVICE: MediaPipeHandService | None = None
 
 
+def clean_mudra_label(raw: str) -> str:
+    """Strip dataset suffixes like 'Ardhachandran(1)' -> 'Ardhachandran'."""
+    if not raw:
+        return raw
+    return raw.split("(", 1)[0].strip()
+
+
 def _models_dir() -> Path:
     return Path(__file__).resolve().parent.parent / "models"
 
@@ -108,4 +115,5 @@ async def predict_frame(file: UploadFile = File(...)) -> dict:
     else:
         label = str(_MODEL.classes_[idx])
 
+    label = clean_mudra_label(label)
     return {"mudra": label, "confidence": confidence}
