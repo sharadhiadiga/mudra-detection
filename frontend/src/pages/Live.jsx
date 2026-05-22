@@ -15,11 +15,15 @@ export default function Live() {
   const { videoRef, canvasRef, live, running, start, stop, isLocked } = useLiveDetection();
 
   const statusText =
-    live.phase === 'locked'
-      ? 'Mudra locked'
-      : running
-        ? 'Detecting…'
-        : 'Place your hand inside the circle';
+    live.phase === 'prediction' && live.currentMudra
+      ? `${live.currentMudra} · ${(live.currentConfidence * 100).toFixed(1)}%`
+      : live.phase === 'no_hand'
+        ? 'No hand detected'
+        : live.lastError
+          ? live.lastError
+          : running
+            ? live.message || 'Detecting…'
+            : 'Place your hand inside the circle';
 
   return (
     <PageShell className="flex min-h-screen flex-col">
@@ -95,9 +99,9 @@ export default function Live() {
           <LiveSidePanel
             phase={live.phase}
             stability={live.stability}
-            confidence={live.lockedConfidence || live.currentConfidence}
-            currentMudra={live.lockedMudra || live.currentMudra}
-            currentConfidence={live.lockedConfidence || live.currentConfidence}
+            confidence={live.currentConfidence}
+            currentMudra={live.currentMudra}
+            currentConfidence={live.currentConfidence}
             history={live.history}
             running={running}
           />

@@ -33,22 +33,30 @@ export default function LiveSidePanel({
   running,
 }) {
   const statusLabel =
-    phase === 'locked'
-      ? 'Locked'
-      : phase === 'stabilizing'
-        ? 'Stabilizing…'
-        : running
+    phase === 'prediction'
+      ? 'Live'
+      : phase === 'no_hand'
+        ? 'No hand'
+        : phase === 'detecting'
           ? 'Detecting…'
-          : 'Idle';
+          : phase === 'error'
+            ? 'Error'
+            : running
+              ? 'Detecting…'
+              : 'Idle';
 
   const phaseDisplay =
-    phase === 'locked'
-      ? 'Locked'
-      : phase === 'stabilizing'
-        ? 'Stabilizing'
-        : running
+    phase === 'prediction'
+      ? 'Live'
+      : phase === 'no_hand'
+        ? 'No hand'
+        : phase === 'detecting'
           ? 'Detecting'
-          : 'Waiting to start';
+          : phase === 'error'
+            ? 'Error'
+            : running
+              ? 'Detecting'
+              : 'Waiting to start';
 
   return (
     <motion.aside
@@ -63,7 +71,7 @@ export default function LiveSidePanel({
         <div className="mb-4 flex items-center gap-2">
           <span
             className={`h-2.5 w-2.5 rounded-full ${
-              phase === 'locked'
+              phase === 'prediction'
                 ? 'bg-success'
                 : running
                   ? 'animate-pulse bg-success'

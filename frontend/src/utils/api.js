@@ -31,15 +31,19 @@ export async function predictFrameBlob(blob) {
   return { ok: res.ok, status: res.status, data };
 }
 
-/** Parse API JSON into display-ready mudra + confidence. */
+/** Parse API JSON into display-ready mudra + confidence + status. */
 export function parseApiResponse(data) {
   if (!data || typeof data !== 'object') {
-    return { mudra: null, confidence: 0 };
+    return { mudra: null, confidence: 0, status: null };
   }
+  const status = data.status ?? null;
   const raw = data.mudra ?? data.label ?? data.prediction ?? null;
   const c = data.confidence ?? data.conf ?? 0;
   const confidence = typeof c === 'number' ? c : parseFloat(c) || 0;
+  const trimmed = raw == null ? '' : String(raw).trim();
   const mudra =
-    raw == null || String(raw).trim() === '' ? null : cleanMudraLabel(String(raw));
-  return { mudra, confidence };
+    trimmed === '' || trimmed.toLowerCase() === 'no hand'
+      ? null
+      : cleanMudraLabel(trimmed);
+  return { mudra, confidence, status };
 }
