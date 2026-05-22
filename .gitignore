@@ -9,14 +9,17 @@ dist/
 *.egg-info/
 .eggs/
 *.egg
+*.pyo
+*.pyd
+
+# Virtual Environments
 .venv/
 venv/
 env/
 ENV/
-pip-log.txt
-pip-delete-this-directory.txt
-*.pyo
-*.pyd
+backend/.venv/
+
+# Testing / Coverage
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
@@ -25,54 +28,46 @@ htmlcov/
 .coverage.*
 coverage.xml
 
+# Logs
+*.log
+pip-log.txt
+pip-delete-this-directory.txt
+
 # ─── Node / React ─────────────────────────────────────────
 node_modules/
 frontend/build/
 frontend/dist/
 .npm
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-build/
-# ─── Environment ──────────────────────────────────────────
+
+# ─── Environment Files ────────────────────────────────────
 .env
 .env.local
 .env.*.local
 
 # ─── ML / Data ────────────────────────────────────────────
-datasets/raw/*
-datasets/processed/*
-!datasets/raw/.gitkeep
-!datasets/processed/.gitkeep
-!ml-models/.gitkeep
+datasets/
+backend/datasets/
 
-# ─── OS ───────────────────────────────────────────────────
+# Ignore all pickle files EXCEPT your trained model
+*.pkl
+!backend/app/models/mudra_model.pkl
+
+# ─── Database ─────────────────────────────────────────────
+*.db
+nritya.db
+backend/nritya.db
+
+# ─── OS Files ─────────────────────────────────────────────
 .DS_Store
 Thumbs.db
 *.swp
 *.swo
 
-# ─── IDE ──────────────────────────────────────────────────
+# ─── IDE / Editor ─────────────────────────────────────────
 .vscode/
 .idea/
 *.sublime-project
 *.sublime-workspace
-datasets/
-*.db
-__pycache__/
-backend/app/models/
-*.pkl
-datasets/
-backend/app/models/
-*.pkl
-__pycache__/
-nritya.db
-.venv/
-backend/.venv/
-datasets/
-backend/datasets/
-nritya.db
-backend/nritya.db
+
+# ─── Optional Docs (ignore if not needed) ──────────────────
 backend/*.md
-*.pyc

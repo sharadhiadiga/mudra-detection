@@ -1,2 +1,4 @@
-export const API_BASE = 'http://127.0.0.1:8000';
+export const API_BASE = "https://nrityaai-mudra.onrender.com";
+
+export const PREDICT_MUDRA = `${API_BASE}/mudra/predict-mudra`;
 export const PREDICT_FRAME = `${API_BASE}/mudra/predict-frame`;
