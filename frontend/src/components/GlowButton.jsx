@@ -2,13 +2,13 @@ import { motion } from 'framer-motion';
 
 const variants = {
   primary:
-    'border-2 border-gold bg-gradient-to-b from-maroon-mid to-maroon text-gold-hi shadow-glow transition-all duration-300 hover:border-gold-hi hover:shadow-glow',
+    'border-2 border-gold bg-gradient-to-b from-maroon-mid to-maroon text-gold-hi transition-all duration-300 hover:border-gold/80 hover:shadow-glow-hover',
   gold:
-    'border-2 border-gold bg-gradient-to-r from-gold-line via-gold to-gold-hi text-maroon font-semibold shadow-glow-gold transition-all duration-300 hover:shadow-glow',
+    'border-2 border-gold bg-gradient-to-r from-gold-line via-gold to-gold-hi text-maroon font-semibold transition-all duration-300 hover:shadow-glow-hover',
   outline:
-    'border border-gold/50 bg-transparent text-gold-hi transition-all duration-300 hover:border-gold hover:shadow-glow-gold',
+    'border border-[rgba(212,175,55,0.35)] bg-transparent text-gold-hi transition-all duration-300 hover:border-gold/60 hover:shadow-glow-hover',
   ghost:
-    'border border-gold/30 bg-maroon-card/60 text-cream/80 transition-all duration-300 hover:border-gold/50 hover:text-cream hover:shadow-glow-gold',
+    'border border-[rgba(212,175,55,0.25)] bg-maroon-card/60 text-cream/80 transition-all duration-300 hover:border-gold/40 hover:text-cream',
 };
 
 export default function GlowButton({
@@ -25,7 +25,7 @@ export default function GlowButton({
 
   if (Component !== 'button') {
     return (
-      <motion.span whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className={cls}>
+      <motion.span whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className={cls}>
         {children}
       </motion.span>
     );
@@ -36,8 +36,8 @@ export default function GlowButton({
       type={type}
       disabled={disabled}
       onClick={onClick}
-      whileHover={disabled ? {} : { scale: 1.03 }}
-      whileTap={disabled ? {} : { scale: 0.97 }}
+      whileHover={disabled ? {} : { scale: 1.02 }}
+      whileTap={disabled ? {} : { scale: 0.98 }}
       className={cls}
       {...props}
     >

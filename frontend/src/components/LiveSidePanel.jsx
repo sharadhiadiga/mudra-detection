@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
 
 const sectionClass =
-  'rounded-xl border border-gold/20 bg-black/25 p-4 backdrop-blur-sm';
+  'rounded-[16px] border border-[rgba(212,175,55,0.2)] bg-black/20 p-4 backdrop-blur-sm';
 const panelClass =
-  'glass-panel flex w-full min-h-[320px] flex-col gap-5 rounded-2xl border border-gold/40 p-6 shadow-glow';
+  'glass-panel elegant-card flex w-full min-h-[320px] flex-col gap-5 p-6';
 
 function Bar({ label, value, color = 'bg-gold' }) {
   return (
@@ -57,7 +57,6 @@ export default function LiveSidePanel({
       animate={{ opacity: 1, x: 0 }}
       className={panelClass}
     >
-      {/* 1. Detection Status */}
       <div className={sectionClass}>
         <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-gold/90">
           Detection Status
@@ -66,7 +65,7 @@ export default function LiveSidePanel({
           <span
             className={`h-2.5 w-2.5 rounded-full ${
               phase === 'locked'
-                ? 'bg-success shadow-[0_0_8px_rgba(74,222,128,0.8)]'
+                ? 'bg-success shadow-[0_0_6px_rgba(74,222,128,0.4)]'
                 : running
                   ? 'animate-pulse bg-success'
                   : 'bg-gold/50'
@@ -84,7 +83,6 @@ export default function LiveSidePanel({
         )}
       </div>
 
-      {/* 2. Current Prediction */}
       <div className={sectionClass}>
         <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-gold/90">
           Current Prediction
@@ -106,7 +104,6 @@ export default function LiveSidePanel({
         </p>
       </div>
 
-      {/* 3. Prediction History */}
       <div className={sectionClass}>
         <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-gold/90">
           Prediction History
@@ -118,7 +115,7 @@ export default function LiveSidePanel({
           {history.map((h) => (
             <li
               key={h.id}
-              className="flex items-center justify-between rounded-lg border border-gold/15 bg-maroon-deep/50 px-3 py-2 text-sm"
+              className="flex items-center justify-between rounded-[12px] border border-[rgba(212,175,55,0.15)] bg-maroon-deep/50 px-3 py-2 text-sm"
             >
               <span className="flex items-center gap-2 font-medium text-cream">
                 <span className="h-2 w-2 rounded-full bg-success" />

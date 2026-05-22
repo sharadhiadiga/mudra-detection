@@ -57,7 +57,7 @@ export default function Home() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4 }}
-        className="mt-14 rounded-2xl border border-gold/20 bg-maroon-card/80 px-4 py-5"
+        className="glass-panel elegant-card mt-14 px-4 py-5"
       >
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {features.map((f, i) => (

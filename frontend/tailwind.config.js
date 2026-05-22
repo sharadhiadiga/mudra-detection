@@ -24,13 +24,14 @@ export default {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
-        glow: '0 0 30px rgba(232,122,42,0.45), 0 0 60px rgba(212,175,55,0.2)',
-        'glow-gold': '0 0 24px rgba(212,175,55,0.35)',
-        'glow-green': '0 0 32px rgba(74,222,128,0.45)',
+        glow: '0 0 15px rgba(232,122,42,0.25), 0 0 30px rgba(212,175,55,0.1)',
+        'glow-gold': '0 0 12px rgba(212,175,55,0.15)',
+        'glow-green': '0 0 16px rgba(74,222,128,0.22)',
+        'glow-hover': '0 0 8px rgba(212,175,55,0.12)',
+        'glow-circle': '0 0 18px rgba(212,175,55,0.1)',
       },
-      backgroundImage: {
-        'radial-maroon':
-          'radial-gradient(ellipse 100% 80% at 50% 0%, #3d1218 0%, #1a0508 45%, #120304 100%)',
+      borderRadius: {
+        card: '20px',
       },
     },
   },

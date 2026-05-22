@@ -1,6 +1,7 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import MandalaBackground from './components/MandalaBackground';
+import NoiseOverlay from './components/NoiseOverlay';
 import Home from './pages/Home';
 import Live from './pages/Live';
 import Upload from './pages/Upload';
@@ -11,6 +12,7 @@ export default function App() {
   return (
     <>
       <MandalaBackground />
+      <NoiseOverlay />
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<Home />} />

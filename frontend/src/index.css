@@ -5,26 +5,26 @@
 @layer base {
   body {
     @apply bg-maroon font-sans text-cream antialiased;
-    background-image: radial-gradient(
-      ellipse 100% 80% at 50% 0%,
-      #3d1218 0%,
-      #1a0508 45%,
-      #120304 100%
-    );
+    background: radial-gradient(ellipse at top, #3d1218 0%, #1a0508 45%, #120304 100%);
     min-height: 100vh;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    background: rgba(35, 12, 14, 0.88);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .elegant-card {
+    @apply rounded-card border shadow-glow;
+    border-color: rgba(212, 175, 55, 0.35);
   }
 }
 
 @layer utilities {
   .text-gold-glow {
-    text-shadow: 0 0 24px rgba(212, 175, 55, 0.35);
-  }
-  .border-gold-glow {
-    box-shadow: 0 0 30px rgba(232, 122, 42, 0.45), 0 0 60px rgba(212, 175, 55, 0.2);
-  }
-  .glass-panel {
-    background: rgba(35, 12, 14, 0.92);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    text-shadow: 0 0 12px rgba(212, 175, 55, 0.2);
   }
 }

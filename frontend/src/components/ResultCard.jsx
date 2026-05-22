@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 
 const cardClass =
-  'glass-panel min-h-[320px] w-full rounded-2xl border border-gold/40 p-8 shadow-glow transition-shadow duration-300';
+  'glass-panel elegant-card min-h-[320px] w-full p-8 transition-shadow duration-300';
 
 export default function ResultCard({ mudra, confidence, loading = false, placeholder }) {
   if (loading) {

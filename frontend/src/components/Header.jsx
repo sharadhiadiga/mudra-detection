@@ -13,7 +13,7 @@ export default function Header({ showBack = false, backTo = '/' }) {
         {showBack ? (
           <Link
             to={backTo}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-gold/40 text-cream transition hover:border-gold hover:shadow-glow-gold"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(212,175,55,0.35)] text-cream transition duration-300 hover:border-gold/50 hover:shadow-glow-hover"
             aria-label="Back"
           >
             ←
