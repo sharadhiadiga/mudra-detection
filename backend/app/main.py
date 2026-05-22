@@ -18,7 +18,12 @@ from app.routes import mudra
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
-        mudra.load_model()
+        import threading
+
+def background_load():
+    mudra.load_model()
+
+threading.Thread(target=background_load).start()
     except FileNotFoundError:
         # Allow server to start; predict will try again or fail clearly.
         pass
