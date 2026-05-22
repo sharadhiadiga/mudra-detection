@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import CircleViewer from '../components/CircleViewer';
+import CircleEmptyState from '../components/CircleEmptyState';
 import GlowButton from '../components/GlowButton';
 import ResultCard from '../components/ResultCard';
 import PageShell from '../components/PageShell';
@@ -58,9 +59,10 @@ export default function Upload() {
   };
 
   return (
-    <PageShell>
+    <PageShell className="flex min-h-screen flex-col">
       <Header showBack backTo="/" />
 
+      <div className="flex flex-1 flex-col justify-center pb-16 pt-8 sm:pt-12">
       <MainGrid
         left={
           <>
@@ -72,12 +74,7 @@ export default function Upload() {
                   className="h-full w-full object-cover"
                 />
               ) : (
-                <div className="flex h-full w-full flex-col items-center justify-center gap-3 text-cream/45">
-                  <span className="text-5xl opacity-80">🖐</span>
-                  <p className="text-xs font-medium uppercase tracking-[0.2em]">
-                    Choose an image
-                  </p>
-                </div>
+                <CircleEmptyState label="Choose an image" />
               )}
             </CircleViewer>
 
@@ -120,6 +117,7 @@ export default function Upload() {
           )
         }
       />
+      </div>
     </PageShell>
   );
 }

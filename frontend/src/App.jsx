@@ -1,6 +1,5 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
-import MandalaBackground from './components/MandalaBackground';
 import NoiseOverlay from './components/NoiseOverlay';
 import Home from './pages/Home';
 import Live from './pages/Live';
@@ -10,8 +9,7 @@ export default function App() {
   const location = useLocation();
 
   return (
-    <>
-      <MandalaBackground />
+    <div className="main-content">
       <NoiseOverlay />
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
@@ -20,6 +18,6 @@ export default function App() {
           <Route path="/upload" element={<Upload />} />
         </Routes>
       </AnimatePresence>
-    </>
+    </div>
   );
 }

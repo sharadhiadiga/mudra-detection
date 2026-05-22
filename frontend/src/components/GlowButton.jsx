@@ -2,13 +2,13 @@ import { motion } from 'framer-motion';
 
 const variants = {
   primary:
-    'border-2 border-gold bg-gradient-to-b from-maroon-mid to-maroon text-gold-hi transition-all duration-300 hover:border-gold/80 hover:shadow-glow-hover',
+    'border-2 border-gold bg-gradient-to-b from-maroon-mid to-maroon text-gold-hi transition-all duration-300 hover:border-gold-hi',
   gold:
-    'border-2 border-gold bg-gradient-to-r from-gold-line via-gold to-gold-hi text-maroon font-semibold transition-all duration-300 hover:shadow-glow-hover',
+    'border-2 border-gold bg-gradient-to-r from-gold-line via-gold to-gold-hi text-maroon font-semibold transition-all duration-300 hover:border-gold-hi',
   outline:
-    'border border-[rgba(212,175,55,0.35)] bg-transparent text-gold-hi transition-all duration-300 hover:border-gold/60 hover:shadow-glow-hover',
+    'border border-[rgba(212,175,55,0.5)] bg-transparent text-gold-hi transition-all duration-300 hover:border-gold-hi',
   ghost:
-    'border border-[rgba(212,175,55,0.25)] bg-maroon-card/60 text-cream/80 transition-all duration-300 hover:border-gold/40 hover:text-cream',
+    'border border-[rgba(212,175,55,0.35)] bg-[rgba(35,12,14,0.6)] text-cream/80 transition-all duration-300 hover:border-gold-hi hover:text-cream',
 };
 
 export default function GlowButton({

@@ -24,7 +24,7 @@ export function StatusPanelLeft({ phase, stability, confidence, frames }) {
     <motion.aside
       initial={{ opacity: 0, x: -16 }}
       animate={{ opacity: 1, x: 0 }}
-      className="rounded-2xl border border-gold/25 bg-maroon-card/90 p-5 shadow-glow-gold"
+      className="elegant-card p-5"
     >
       <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.15em] text-gold/90">
         Detection Status
@@ -55,7 +55,7 @@ export function StatusPanelRight({ currentMudra, currentConfidence, history, pha
     <motion.aside
       initial={{ opacity: 0, x: 16 }}
       animate={{ opacity: 1, x: 0 }}
-      className="rounded-2xl border border-gold/25 bg-maroon-card/90 p-5 shadow-glow-gold"
+      className="elegant-card p-5"
     >
       <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.15em] text-gold/90">
         Current Prediction

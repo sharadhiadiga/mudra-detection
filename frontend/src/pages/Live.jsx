@@ -1,7 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Header from '../components/Header';
+import { Video } from 'lucide-react';
 import CircleViewer from '../components/CircleViewer';
+import CircleEmptyState from '../components/CircleEmptyState';
 import GlowButton from '../components/GlowButton';
 import PageShell from '../components/PageShell';
 import MainGrid from '../components/MainGrid';
@@ -20,9 +22,10 @@ export default function Live() {
         : 'Place your hand inside the circle';
 
   return (
-    <PageShell>
+    <PageShell className="flex min-h-screen flex-col">
       <Header showBack backTo="/" />
 
+      <div className="flex flex-1 flex-col justify-center pb-16 pt-8 sm:pt-12">
       <MainGrid
         left={
           <>
@@ -41,11 +44,8 @@ export default function Live() {
                   autoPlay
                 />
                 {!running && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black text-cream/40">
-                    <span className="text-4xl">📷</span>
-                    <p className="px-6 text-center text-xs uppercase tracking-wider">
-                      Camera preview
-                    </p>
+                  <div className="absolute inset-0 bg-black">
+                    <CircleEmptyState icon={Video} label="Camera preview" />
                   </div>
                 )}
               </div>
@@ -103,6 +103,7 @@ export default function Live() {
           />
         }
       />
+      </div>
     </PageShell>
   );
 }

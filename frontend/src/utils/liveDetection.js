@@ -48,12 +48,12 @@ function drawFrameToBlob(video, canvas) {
 
 function applySmoothingAndLock(mudra, confidence, setResult) {
   if (locked) {
-    setResult(`FINAL: ${locked} 🔒`);
+    setResult(`FINAL: ${locked} (locked)`);
     return;
   }
 
   if (mudra == null) {
-    setResult('No hand detected ❌');
+    setResult('No hand detected');
     return;
   }
 
@@ -76,7 +76,7 @@ function applySmoothingAndLock(mudra, confidence, setResult) {
 
   if (streak >= LOCK_STREAK) {
     locked = mudra;
-    setResult(`FINAL: ${locked} 🔒`);
+    setResult(`FINAL: ${locked} (locked)`);
     return;
   }
 
@@ -90,7 +90,7 @@ async function tick(videoRef, canvasRef, setResult) {
   if (!video || !canvas || video.readyState < 2) return;
 
   if (locked) {
-    setResult(`FINAL: ${locked} 🔒`);
+    setResult(`FINAL: ${locked} (locked)`);
     return;
   }
 

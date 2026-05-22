@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { Lock } from 'lucide-react';
 
 const SIZE = 350;
 
@@ -11,10 +12,10 @@ export default function CircleViewer({
   className = '',
 }) {
   const ringClass = locked
-    ? 'border-success shadow-glow-green'
+    ? 'border-success'
     : live
-      ? 'animate-pulse border-gold shadow-glow-circle'
-      : 'border-gold shadow-glow-circle';
+      ? 'animate-pulse border-gold'
+      : 'border-gold';
 
   return (
     <div className={`flex flex-col items-center ${className}`}>
@@ -34,7 +35,7 @@ export default function CircleViewer({
               rgba(212,175,55,0.03) 200deg, transparent 220deg,
               rgba(212,175,55,0.04) 280deg, transparent 300deg
             )`,
-            boxShadow: '0 0 24px rgba(212,175,55,0.06)',
+            boxShadow: 'inset 0 0 12px rgba(212,175,55,0.08)',
           }}
           aria-hidden="true"
         />
@@ -53,9 +54,9 @@ export default function CircleViewer({
               ? {
                   scale: [1, 1.02, 1],
                   boxShadow: [
-                    '0 0 18px rgba(74,222,128,0.22), 0 0 36px rgba(74,222,128,0.12)',
-                    '0 0 24px rgba(74,222,128,0.28), 0 0 44px rgba(74,222,128,0.15)',
-                    '0 0 18px rgba(74,222,128,0.22), 0 0 36px rgba(74,222,128,0.12)',
+                    'inset 0 0 12px rgba(74,222,128,0.2)',
+                    'inset 0 0 18px rgba(74,222,128,0.28)',
+                    'inset 0 0 12px rgba(74,222,128,0.2)',
                   ],
                 }
               : live
@@ -63,7 +64,7 @@ export default function CircleViewer({
                 : {}
           }
           transition={{ duration: 2.5, repeat: Infinity }}
-          className={`relative h-full w-full overflow-hidden rounded-full border-[3px] bg-black ${ringClass}`}
+          className={`group relative h-full w-full overflow-hidden rounded-full border-[3px] bg-black ${ringClass}`}
         >
           {children}
           {showGuide && (
@@ -75,8 +76,8 @@ export default function CircleViewer({
             </div>
           )}
           {locked && (
-            <div className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full border-2 border-success bg-black/80 text-lg text-success">
-              🔒
+            <div className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full border-2 border-success bg-black/80 text-success">
+              <Lock className="h-5 w-5" strokeWidth={1.5} aria-hidden />
             </div>
           )}
         </motion.div>

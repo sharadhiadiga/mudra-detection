@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { ChevronLeft } from 'lucide-react';
 import GlowButton from './GlowButton';
 
 export default function Header({ showBack = false, backTo = '/' }) {
@@ -9,19 +10,19 @@ export default function Header({ showBack = false, backTo = '/' }) {
       animate={{ opacity: 1, y: 0 }}
       className="relative z-10 mb-8 flex items-center justify-between gap-4 border-b border-gold/20 pb-5"
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5">
         {showBack ? (
           <Link
             to={backTo}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(212,175,55,0.35)] text-cream transition duration-300 hover:border-gold/50 hover:shadow-glow-hover"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[rgba(212,175,55,0.5)] text-gold transition duration-300 hover:scale-[1.02] hover:border-gold-hi"
             aria-label="Back"
           >
-            ←
+            <ChevronLeft className="h-5 w-5" strokeWidth={1.5} />
           </Link>
         ) : (
-          <span className="flex h-10 w-10 items-center justify-center rounded-full border border-gold/50 bg-maroon-card text-lg text-gold-hi">
-            ॥
-          </span>
+          <Link to="/" className="logo" aria-label="NrityaAI home">
+            <img src="/assets/logo.png" alt="" />
+          </Link>
         )}
         <div>
           <Link to="/" className="font-serif text-lg font-bold tracking-[0.2em] text-gold-hi">

@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 
-const cardClass =
-  'glass-panel elegant-card min-h-[320px] w-full p-8 transition-shadow duration-300';
+const cardClass = 'elegant-card min-h-[320px] w-full p-8';
 
 export default function ResultCard({ mudra, confidence, loading = false, placeholder }) {
   if (loading) {
@@ -12,7 +11,7 @@ export default function ResultCard({ mudra, confidence, loading = false, placeho
         className={cardClass}
       >
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold/90">
-          ◆ Detection Result
+          Detection Result
         </p>
         <p className="mt-8 animate-pulse text-cream/60">Analyzing mudra…</p>
       </motion.div>
@@ -23,7 +22,7 @@ export default function ResultCard({ mudra, confidence, loading = false, placeho
     return (
       <div className={`${cardClass} flex flex-col justify-center`}>
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold/90">
-          ◆ Detection Result
+          Detection Result
         </p>
         <p className="mt-6 text-sm leading-relaxed text-cream/55">
           {placeholder ||
@@ -41,7 +40,7 @@ export default function ResultCard({ mudra, confidence, loading = false, placeho
       className={cardClass}
     >
       <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold/90">
-        ◆ Detection Result
+        Detection Result
       </p>
       <p className="mt-6 font-serif text-5xl font-bold leading-tight text-gold-hi text-gold-glow">
         {mudra}
