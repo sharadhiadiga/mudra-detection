@@ -1,6 +1,6 @@
 ## 🪔 AI Mudra Detection
 
-The Mudra Detection module identifies hand gestures used in Bharatiya classical dance using computer vision and machine learning.
+The Mudra Detection module identifies hand gestures used in Bharatanatyam using computer vision and machine learning.
 
 ### 🎯 Features
 - 📸 Image-based mudra prediction  
