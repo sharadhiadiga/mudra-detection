@@ -34,7 +34,7 @@ frontend/dist/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
+build/
 # ─── Environment ──────────────────────────────────────────
 .env
 .env.local
@@ -43,9 +43,6 @@ yarn-error.log*
 # ─── ML / Data ────────────────────────────────────────────
 datasets/raw/*
 datasets/processed/*
-ml-models/*.pt
-ml-models/*.h5
-ml-models/*.pkl
 !datasets/raw/.gitkeep
 !datasets/processed/.gitkeep
 !ml-models/.gitkeep
@@ -70,3 +67,12 @@ datasets/
 backend/app/models/
 *.pkl
 __pycache__/
+nritya.db
+.venv/
+backend/.venv/
+datasets/
+backend/datasets/
+nritya.db
+backend/nritya.db
+backend/*.md
+*.pyc
