@@ -44,8 +44,6 @@ class MediaPipeHandService:
         rgb_u8 = np.ascontiguousarray(rgb)
         results = self._hands.process(rgb_u8)
         if not results.multi_hand_landmarks:
-            results = self._hands.process(rgb_u8)
-        if not results.multi_hand_landmarks:
             return None
         lm = results.multi_hand_landmarks[0].landmark
         out = np.empty((21, 3), dtype=np.float32)

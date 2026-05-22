@@ -1,10 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { predictFrameBlob, parseApiResponse } from '../utils/api';
 
-const CAPTURE_MS = 300;
-const FRAME_SIZE = 256;
-const JPEG_QUALITY = 0.85;
+const CAPTURE_MS = 800;
+const FRAME_SIZE = 128;
+const JPEG_QUALITY = 0.8;
+const MIN_CONFIDENCE = 0.6;
+const VOTE_WINDOW = 5;
+const VOTE_THRESHOLD = 3;
 const HISTORY_LIMIT = 5;
+const FETCH_TIMEOUT_MS = 3000;
 
 const initialState = {
   phase: 'idle',
@@ -16,6 +20,21 @@ const initialState = {
   message: '—',
   lastError: null,
 };
+
+function majorityVote(list) {
+  if (!list.length) return { label: null, count: 0 };
+  const counts = {};
+  for (const m of list) counts[m] = (counts[m] || 0) + 1;
+  let best = null;
+  let max = 0;
+  for (const [k, v] of Object.entries(counts)) {
+    if (v > max) {
+      max = v;
+      best = k;
+    }
+  }
+  return { label: best, count: max };
+}
 
 function captureFrameBlob(video, canvas) {
   if (!video?.videoWidth || !video?.videoHeight || video.readyState < 2) {
@@ -35,8 +54,10 @@ export function useLiveDetection() {
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
   const runningRef = useRef(false);
-  const inFlightRef = useRef(false);
+  const isProcessingRef = useRef(false);
   const loopTimerRef = useRef(null);
+  const voteBufferRef = useRef([]);
+  const runTickRef = useRef(null);
 
   const [live, setLive] = useState(initialState);
   const [running, setRunning] = useState(false);
@@ -48,48 +69,9 @@ export function useLiveDetection() {
     }
   }, []);
 
-  const pushHistory = useCallback((mudra, confidence) => {
-    setLive((prev) => ({
-      ...prev,
-      history: [{ mudra, confidence, id: Date.now() }, ...prev.history].slice(
-        0,
-        HISTORY_LIMIT
-      ),
-    }));
+  const resetVoteBuffer = useCallback(() => {
+    voteBufferRef.current = [];
   }, []);
-
-  const applyPrediction = useCallback(
-    (mudra, confidence) => {
-      if (mudra == null) {
-        setLive((prev) => ({
-          ...prev,
-          phase: 'no_hand',
-          currentMudra: null,
-          currentConfidence: 0,
-          stability: 0,
-          message: 'No hand detected',
-          lastError: null,
-          framesAnalyzed: prev.framesAnalyzed + 1,
-        }));
-        return;
-      }
-
-      pushHistory(mudra, confidence);
-      setLive((prev) => ({
-        ...prev,
-        phase: 'prediction',
-        currentMudra: mudra,
-        currentConfidence: confidence,
-        stability: Math.round(confidence * 100),
-        message: mudra,
-        lastError: null,
-        framesAnalyzed: prev.framesAnalyzed + 1,
-      }));
-    },
-    [pushHistory]
-  );
-
-  const runTickRef = useRef(null);
 
   const scheduleNext = useCallback(
     (delay = CAPTURE_MS) => {
@@ -102,8 +84,104 @@ export function useLiveDetection() {
     [clearLoopTimer]
   );
 
+  const pushHistory = useCallback((mudra, confidence) => {
+    setLive((prev) => ({
+      ...prev,
+      history: [{ mudra, confidence, id: Date.now() }, ...prev.history].slice(
+        0,
+        HISTORY_LIMIT
+      ),
+    }));
+  }, []);
+
+  const setNoHand = useCallback(() => {
+    resetVoteBuffer();
+    setLive((prev) => ({
+      ...prev,
+      phase: 'no_hand',
+      currentMudra: null,
+      currentConfidence: 0,
+      stability: 0,
+      message: 'No hand detected',
+      lastError: null,
+      framesAnalyzed: prev.framesAnalyzed + 1,
+    }));
+  }, [resetVoteBuffer]);
+
+  const applyStablePrediction = useCallback(
+    (mudra, confidence) => {
+      const { label, count } = majorityVote(voteBufferRef.current);
+      if (!label || count < VOTE_THRESHOLD) {
+        setLive((prev) => ({
+          ...prev,
+          phase: 'stabilizing',
+          message: 'Hold steady…',
+          lastError: null,
+          framesAnalyzed: prev.framesAnalyzed + 1,
+        }));
+        return;
+      }
+
+      pushHistory(label, confidence);
+      const stability = Math.round((count / voteBufferRef.current.length) * 100);
+      setLive((prev) => ({
+        ...prev,
+        phase: 'prediction',
+        currentMudra: label,
+        currentConfidence: confidence,
+        stability,
+        message: label,
+        lastError: null,
+        framesAnalyzed: prev.framesAnalyzed + 1,
+      }));
+    },
+    [pushHistory]
+  );
+
+  const handleFrameResult = useCallback(
+    (mudra, confidence, responseStatus) => {
+      if (responseStatus === 'loading') {
+        setLive((prev) => ({
+          ...prev,
+          phase: 'detecting',
+          message: 'Loading model…',
+          lastError: null,
+        }));
+        return;
+      }
+
+      if (mudra == null) {
+        setNoHand();
+        return;
+      }
+
+      if (confidence < MIN_CONFIDENCE) {
+        setLive((prev) => ({
+          ...prev,
+          phase: prev.currentMudra ? 'stabilizing' : 'detecting',
+          message: prev.currentMudra ? 'Hold steady…' : 'Position your hand',
+          lastError: null,
+          framesAnalyzed: prev.framesAnalyzed + 1,
+        }));
+        return;
+      }
+
+      voteBufferRef.current.push(mudra);
+      if (voteBufferRef.current.length > VOTE_WINDOW) {
+        voteBufferRef.current.shift();
+      }
+      applyStablePrediction(mudra, confidence);
+    },
+    [applyStablePrediction, setNoHand]
+  );
+
   const runTick = useCallback(async () => {
-    if (!runningRef.current || inFlightRef.current) return;
+    if (!runningRef.current) return;
+
+    if (isProcessingRef.current) {
+      scheduleNext();
+      return;
+    }
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -118,9 +196,19 @@ export function useLiveDetection() {
       return;
     }
 
-    inFlightRef.current = true;
+    isProcessingRef.current = true;
     try {
-      const { ok, status, data } = await predictFrameBlob(blob);
+      const { ok, status, data, timedOut } = await predictFrameBlob(blob, {
+        timeoutMs: FETCH_TIMEOUT_MS,
+      });
+
+      if (timedOut) {
+        setLive((prev) => ({
+          ...prev,
+          lastError: 'Request timed out',
+        }));
+        return;
+      }
 
       if (data?.status === 'loading') {
         setLive((prev) => ({
@@ -142,45 +230,40 @@ export function useLiveDetection() {
       }
 
       const { mudra, confidence, status: responseStatus } = parseApiResponse(data);
-
-      if (responseStatus === 'loading') {
-        setLive((prev) => ({
-          ...prev,
-          phase: 'detecting',
-          message: 'Loading model…',
-          lastError: null,
-        }));
+      if (data?.status === 'no_hand' || responseStatus === 'no_hand') {
+        setNoHand();
         return;
       }
 
-      applyPrediction(mudra, confidence);
+      handleFrameResult(mudra, confidence, responseStatus);
     } catch {
       setLive((prev) => ({
         ...prev,
         lastError: 'Network error',
       }));
     } finally {
-      inFlightRef.current = false;
+      isProcessingRef.current = false;
       scheduleNext();
     }
-  }, [applyPrediction, scheduleNext]);
+  }, [handleFrameResult, scheduleNext, setNoHand]);
 
   runTickRef.current = runTick;
 
   const start = useCallback(async () => {
     clearLoopTimer();
     runningRef.current = false;
-    inFlightRef.current = false;
+    isProcessingRef.current = false;
+    resetVoteBuffer();
 
     setLive({
       ...initialState,
       phase: 'detecting',
-      message: 'Detecting…',
+      message: 'Starting camera…',
     });
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user' },
+        video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
       });
       streamRef.current = stream;
       if (videoRef.current) {
@@ -199,12 +282,13 @@ export function useLiveDetection() {
     runningRef.current = true;
     setRunning(true);
     void runTick();
-  }, [clearLoopTimer, runTick]);
+  }, [clearLoopTimer, resetVoteBuffer, runTick]);
 
   const stop = useCallback(() => {
     runningRef.current = false;
-    inFlightRef.current = false;
+    isProcessingRef.current = false;
     clearLoopTimer();
+    resetVoteBuffer();
 
     setRunning(false);
     if (streamRef.current) {
@@ -213,7 +297,7 @@ export function useLiveDetection() {
     }
     if (videoRef.current) videoRef.current.srcObject = null;
     setLive(initialState);
-  }, [clearLoopTimer]);
+  }, [clearLoopTimer, resetVoteBuffer]);
 
   useEffect(() => () => stop(), [stop]);
 

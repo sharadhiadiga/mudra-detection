@@ -1,34 +1,48 @@
 import { PREDICT_FRAME } from '../config';
 import { cleanMudraLabel } from './mudra';
 
+const DEFAULT_TIMEOUT_MS = 3000;
+
+async function fetchPredictFrame(formData, timeoutMs = DEFAULT_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await fetch(PREDICT_FRAME, {
+      method: 'POST',
+      body: formData,
+      signal: controller.signal,
+    });
+
+    let data = null;
+    try {
+      data = await res.json();
+    } catch {
+      data = null;
+    }
+
+    return { ok: res.ok, status: res.status, data, timedOut: false };
+  } catch (err) {
+    if (err?.name === 'AbortError') {
+      return { ok: false, status: 408, data: null, timedOut: true };
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export async function detectMudra(file) {
   const formData = new FormData();
   formData.append('file', file);
-
-  console.log('Calling API:', PREDICT_FRAME);
-
-  const res = await fetch(PREDICT_FRAME, {
-    method: 'POST',
-    body: formData,
-  });
-
-  const data = await res.json();
-  return { ok: res.ok, status: res.status, data };
+  return fetchPredictFrame(formData);
 }
 
-export async function predictFrameBlob(blob) {
+export async function predictFrameBlob(blob, options = {}) {
   const formData = new FormData();
   formData.append('file', blob, 'frame.jpg');
-
-  console.log('Calling API:', PREDICT_FRAME);
-
-  const res = await fetch(PREDICT_FRAME, {
-    method: 'POST',
-    body: formData,
-  });
-
-  const data = await res.json();
-  return { ok: res.ok, status: res.status, data };
+  const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  return fetchPredictFrame(formData, timeoutMs);
 }
 
 /** Parse API JSON into display-ready mudra + confidence + status. */

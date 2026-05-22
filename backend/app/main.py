@@ -17,18 +17,14 @@ from app.routes import mudra
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("🚀 Starting app...")
-
-    # ✅ LOAD MODEL PROPERLY (NOT THREAD)
+    logging.basicConfig(level=logging.INFO)
     try:
         mudra.load_model()
-        print("✅ Model loaded successfully")
-    except Exception as e:
-        print("❌ Model failed to load:", str(e))
+    except Exception:
+        logging.getLogger(__name__).exception("Model failed to load at startup")
 
     yield
 
-    print("🛑 Shutting down...")
     try:
         await asyncio.to_thread(mudra.unload_artifacts)
     except Exception:

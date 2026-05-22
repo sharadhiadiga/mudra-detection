@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import asyncio
 import json
-import time
+import logging
 from pathlib import Path
 from typing import Any
 
@@ -13,11 +14,20 @@ from fastapi import APIRouter, File, UploadFile
 from app.services.feature_extractor import FEATURE_VECTOR_SIZE
 from app.services.mediapipe_service import MediaPipeHandService
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(tags=["mudra"])
 
 _MODEL: Any = None
 _LABEL_ENCODER: Any = None
 _SERVICE: MediaPipeHandService | None = None
+
+FRAME_SIZE = (128, 128)
+READ_TIMEOUT_SEC = 2.0
+PREDICT_TIMEOUT_SEC = 4.0
+MAX_UPLOAD_BYTES = 512_000
+
+_NO_HAND = {"mudra": None, "confidence": 0.0, "status": "no_hand"}
 
 
 def clean_mudra_label(raw: str) -> str:
@@ -30,9 +40,12 @@ def _models_dir() -> Path:
     return Path(__file__).resolve().parent.parent / "models"
 
 
-# ✅ LOAD ONCE
 def load_model() -> None:
+    """Load model and MediaPipe once at application startup."""
     global _MODEL, _LABEL_ENCODER, _SERVICE
+
+    if _MODEL is not None and _SERVICE is not None:
+        return
 
     model_path = _models_dir() / "mudra_model.pkl"
     if not model_path.is_file():
@@ -50,17 +63,54 @@ def load_model() -> None:
     if _SERVICE is None:
         _SERVICE = MediaPipeHandService()
 
-    print("✅ Model + MediaPipe loaded")
+    logger.info("Mudra model and MediaPipe ready")
 
 
 def unload_artifacts() -> None:
-    global _SERVICE
+    global _SERVICE, _MODEL, _LABEL_ENCODER
     if _SERVICE is not None:
         try:
             _SERVICE.close()
         except Exception:
             pass
         _SERVICE = None
+    _MODEL = None
+    _LABEL_ENCODER = None
+
+
+def _predict_from_bytes(raw: bytes) -> dict:
+    """Synchronous inference using globals loaded at startup."""
+    if _MODEL is None or _SERVICE is None:
+        return {"mudra": None, "confidence": 0.0, "status": "loading"}
+
+    if not raw:
+        return dict(_NO_HAND)
+
+    arr = np.frombuffer(raw, dtype=np.uint8)
+    bgr = cv2.imdecode(arr, cv2.IMREAD_COLOR)
+    if bgr is None:
+        return dict(_NO_HAND)
+
+    bgr = cv2.resize(bgr, FRAME_SIZE, interpolation=cv2.INTER_AREA)
+
+    feat = _SERVICE.feature_vector_from_bgr(bgr)
+    if feat is None:
+        return dict(_NO_HAND)
+
+    if feat.shape[0] != FEATURE_VECTOR_SIZE:
+        return dict(_NO_HAND)
+
+    proba = _MODEL.predict_proba(feat.reshape(1, -1))[0]
+    idx = int(np.argmax(proba))
+    confidence = float(proba[idx])
+
+    if _LABEL_ENCODER is not None:
+        label = str(_LABEL_ENCODER.inverse_transform(np.array([idx]))[0])
+    else:
+        label = str(_MODEL.classes_[idx])
+
+    label = clean_mudra_label(label)
+    return {"mudra": label, "confidence": confidence}
 
 
 @router.get("/mudra/labels")
@@ -72,51 +122,23 @@ def list_labels() -> dict:
     return {"classes": data.get("classes") or []}
 
 
-# 🚀 FINAL SAFE ENDPOINT
 @router.post("/mudra/predict-frame")
 async def predict_frame(file: UploadFile = File(...)) -> dict:
-    start = time.time()
+    try:
+        raw = await asyncio.wait_for(file.read(), timeout=READ_TIMEOUT_SEC)
+    except asyncio.TimeoutError:
+        return {"mudra": None, "confidence": 0.0, "status": "timeout"}
 
-    # ✅ MODEL LOADING STATE
-    if _MODEL is None or _SERVICE is None:
-        return {"mudra": None, "confidence": 0.0, "status": "loading"}
+    if len(raw) > MAX_UPLOAD_BYTES:
+        return {"mudra": None, "confidence": 0.0, "status": "error"}
 
     try:
-        raw = await file.read()
-        if not raw:
-            return {"mudra": None, "confidence": 0.0}
-
-        arr = np.frombuffer(raw, dtype=np.uint8)
-        bgr = cv2.imdecode(arr, cv2.IMREAD_COLOR)
-
-        if bgr is None:
-            return {"mudra": None, "confidence": 0.0}
-
-        # ⚡ SPEED BOOST
-        bgr = cv2.resize(bgr, (256, 256))
-
-        feat = _SERVICE.feature_vector_from_bgr(bgr)
-        if feat is None:
-            return {"mudra": None, "confidence": 0.0}
-
-        if feat.shape[0] != FEATURE_VECTOR_SIZE:
-            return {"mudra": None, "confidence": 0.0}
-
-        proba = _MODEL.predict_proba(feat.reshape(1, -1))[0]
-        idx = int(np.argmax(proba))
-        confidence = float(proba[idx])
-
-        if _LABEL_ENCODER is not None:
-            label = str(_LABEL_ENCODER.inverse_transform(np.array([idx]))[0])
-        else:
-            label = str(_MODEL.classes_[idx])
-
-        label = clean_mudra_label(label)
-
-        print("⏱ Prediction time:", round(time.time() - start, 2), "sec")
-
-        return {"mudra": label, "confidence": confidence}
-
-    except Exception as e:
-        print("🔥 ERROR:", str(e))
-        return {"mudra": None, "confidence": 0.0}
+        return await asyncio.wait_for(
+            asyncio.to_thread(_predict_from_bytes, raw),
+            timeout=PREDICT_TIMEOUT_SEC,
+        )
+    except asyncio.TimeoutError:
+        return {"mudra": None, "confidence": 0.0, "status": "timeout"}
+    except Exception:
+        logger.exception("predict-frame failed")
+        return {"mudra": None, "confidence": 0.0, "status": "error"}

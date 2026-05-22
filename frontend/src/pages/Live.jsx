@@ -19,11 +19,13 @@ export default function Live() {
       ? `${live.currentMudra} · ${(live.currentConfidence * 100).toFixed(1)}%`
       : live.phase === 'no_hand'
         ? 'No hand detected'
-        : live.lastError
-          ? live.lastError
-          : running
-            ? live.message || 'Detecting…'
-            : 'Place your hand inside the circle';
+        : live.phase === 'stabilizing'
+          ? live.message || 'Hold steady…'
+          : live.lastError
+            ? live.lastError
+            : running
+              ? live.message || 'Position your hand'
+              : 'Place your hand inside the circle';
 
   return (
     <PageShell className="flex min-h-screen flex-col">

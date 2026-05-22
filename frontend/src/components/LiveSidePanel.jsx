@@ -36,27 +36,31 @@ export default function LiveSidePanel({
     phase === 'prediction'
       ? 'Live'
       : phase === 'no_hand'
-        ? 'No hand'
-        : phase === 'detecting'
-          ? 'Detecting…'
-          : phase === 'error'
-            ? 'Error'
-            : running
-              ? 'Detecting…'
-              : 'Idle';
+        ? 'No hand detected'
+        : phase === 'stabilizing'
+          ? 'Stabilizing…'
+          : phase === 'detecting'
+            ? 'Waiting…'
+            : phase === 'error'
+              ? 'Error'
+              : running
+                ? 'Waiting…'
+                : 'Idle';
 
   const phaseDisplay =
     phase === 'prediction'
       ? 'Live'
       : phase === 'no_hand'
         ? 'No hand'
-        : phase === 'detecting'
-          ? 'Detecting'
-          : phase === 'error'
-            ? 'Error'
-            : running
-              ? 'Detecting'
-              : 'Waiting to start';
+        : phase === 'stabilizing'
+          ? 'Stabilizing'
+          : phase === 'detecting'
+            ? 'Waiting'
+            : phase === 'error'
+              ? 'Error'
+              : running
+                ? 'Waiting'
+                : 'Waiting to start';
 
   return (
     <motion.aside
