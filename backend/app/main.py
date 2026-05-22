@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+import threading
 from contextlib import asynccontextmanager
 
 # Quiet TensorFlow / absl before any app import pulls mediapipe.
@@ -17,18 +18,19 @@ from app.routes import mudra
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    try:
-        import threading
+    # 🚀 Load model in background (NON-BLOCKING)
+    def background_load():
+        try:
+            mudra.load_model()
+            print("✅ Model loaded in background")
+        except FileNotFoundError:
+            print("⚠️ Model not found at startup")
 
-def background_load():
-    mudra.load_model()
+    threading.Thread(target=background_load).start()
 
-threading.Thread(target=background_load).start()
-    except FileNotFoundError:
-        # Allow server to start; predict will try again or fail clearly.
-        pass
     yield
-    # Run teardown in a thread so a slow MediaPipe close does not block shutdown.
+
+    # 🧹 Cleanup (safe shutdown)
     try:
         await asyncio.to_thread(mudra.unload_artifacts)
     except asyncio.CancelledError:
@@ -37,6 +39,8 @@ threading.Thread(target=background_load).start()
 
 
 app = FastAPI(title="NrityaAI Mudra", lifespan=lifespan)
+
+# 🌐 CORS (allow frontend access)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -44,9 +48,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 🔗 Routes
 app.include_router(mudra.router)
 
 
+# ❤️ Health check (important for Render)
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok"}
